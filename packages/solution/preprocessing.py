@@ -2,7 +2,11 @@ import cv2
 import numpy as np
 
 # simulator images
-lower_hsv = np.array([20, 100, 100])
+# lower_hsv = np.array([20, 100, 100])
+# upper_hsv = np.array([30, 255, 255])
+
+
+lower_hsv = np.array([0, 0, 60])
 upper_hsv = np.array([30, 255, 255])
 
 

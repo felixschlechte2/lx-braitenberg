@@ -9,6 +9,8 @@ from typing import Optional, Tuple
 import numpy as np
 from PIL import Image
 
+import time
+
 from dtps import context, ContextConfig, DTPSContext
 from dtps_http import RawData
 from duckietown_messages.sensors.compressed_image import CompressedImage
@@ -153,11 +155,14 @@ class BraitenbergAgent:
         self._pwm: Optional[DTPSContext] = None
         self._loop: Optional[AbstractEventLoop] = None
 
+        self.frame_count = 0 
+
 
 
 
     def compute_commands(self) -> Tuple[float, float]:
         """Returns the commands (pwm_left, pwm_right)"""
+
         # If we have not received any image, we don't move
         if self.rgb is None:
             return 0.0, 0.0
@@ -171,13 +176,14 @@ class BraitenbergAgent:
         from matplotlib import pyplot as plt
         plt.imshow(self.rgb, interpolation='nearest')
         plt.show()
+
         # let's take only the intensity of RGB
         P = preprocess(self.rgb)
         # now we just compute the activation of our sensors
         l = float(np.sum(P * self.left))
         r = float(np.sum(P * self.right))
-        print(f"l = {l}")
-        print(f"r = {r}")
+        # print(f"l = {l}")
+        # print(f"r = {r}")
         # These are big numbers -- we want to normalize them.
         # We normalize them using the history
 
@@ -187,10 +193,10 @@ class BraitenbergAgent:
         self.l_min = min(l, self.l_min)
         self.r_min = min(r, self.r_min)
 
-        print(f"l_max = {self.l_max}")
-        print(f"r_max = {self.r_max}")
-        print(f"l_min = {self.l_min}")
-        print(f"r_min = {self.r_min}")
+        # print(f"l_max = {self.l_max}")
+        # print(f"r_max = {self.r_max}")
+        # print(f"l_min = {self.l_min}")
+        # print(f"r_min = {self.r_min}")
 
         # now rescale from 0 to 1
         ls = rescale(l, self.l_min, self.l_max)
@@ -201,6 +207,8 @@ class BraitenbergAgent:
         const = self.config.const
         pwm_left = const + ls * gain
         pwm_right = const + rs * gain
+
+        print("----------------------")
 
         return pwm_left, pwm_right
 
